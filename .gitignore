@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Local environment files
+.env
+*.log
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Docker local override (keep docker-compose-example.yml tracked)
+docker-compose.yml
+
+# Python build
+build/
+dist/
+*.egg-info/
+
+# Local data cache
+/data/vpsdb.json
+/data/vpsdb.lastUpdated.json
