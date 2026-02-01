@@ -1,0 +1,35 @@
+{% extends "_layout.html" %}
+{% block content %}
+  <table class="mini-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Version</th>
+        <th>Format</th>
+        <th>Authors</th>
+        <th>Updated</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr class="click-row" data-href="{{ r.url }}">
+        <td class="name">{{ r.name }}</td>
+        <td>{{ r.version }}</td>
+        <td>{{ r.format }}</td>
+        <td class="muted">{{ r.authors }}</td>
+        <td class="muted">{{ r.updatedAt }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    // Make rows clickable without adding extra anchors everywhere.
+    document.querySelectorAll(".click-row").forEach((row) => {
+      row.addEventListener("click", () => {
+        const href = row.getAttribute("data-href");
+        if (href) window.open(href, "_blank", "noopener,noreferrer");
+      });
+    });
+  </script>
+{% endblock %}

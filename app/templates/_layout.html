@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en" data-theme="{{ theme|default('light') }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{{ title|default('Widget') }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/widget.css') }}" />
+  </head>
+  <body class="theme-{{ theme|default('light') }}">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">{{ title|default('Widget') }}</div>
+      </div>
+      <div class="card-body">
+        {% block content %}{% endblock %}
+      </div>
+      <div class="card-footer">
+        <span>Pinball Widget API</span>
+      </div>
+    </div>
+  </body>
+</html>

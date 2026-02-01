@@ -1,0 +1,14 @@
+{% extends "_layout.html" %}
+{% block content %}
+  <div class="image-row">
+    {% for r in rows %}
+      <a class="image-tile" href="{{ r.url }}" target="_blank" rel="noopener noreferrer" title="{{ r.name }} {{ r.version }}">
+        <img src="{{ r.imgUrl }}" alt="{{ r.name }}" loading="lazy" />
+        <div class="image-caption">
+          <div class="cap-title">{{ r.name }}</div>
+          <div class="cap-sub muted">{{ r.version }} • {{ r.format }}</div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% endblock %}
