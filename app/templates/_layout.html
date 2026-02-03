@@ -8,15 +8,23 @@
   </head>
   <body class="theme-{{ theme|default('light') }}">
     <div class="card">
-      <div class="card-header">
-        <div class="card-title">{{ title|default('Widget') }}</div>
-      </div>
+      {% if show_header|default(true) %}
+        <div class="card-header">
+          {# existing header content #}
+            <div class="card-title">{{ title|default('Widget') }}</div>
+          {% block card_header %}{% endblock %}
+        </div>
+      {% endif %}
       <div class="card-body">
         {% block content %}{% endblock %}
       </div>
-      <div class="card-footer">
-        <span>Pinball Widget API</span>
-      </div>
+      {% if show_footer|default(true) %}
+        <div class="card-footer">
+          {# existing footer content #}
+            <span>Pinball Widget API</span>
+          {% block card_footer %}{% endblock %}
+        </div>
+      {% endif %}
     </div>
   </body>
 </html>

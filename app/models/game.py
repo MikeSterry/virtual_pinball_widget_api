@@ -49,7 +49,7 @@ class Game(BaseModel):
 
     @staticmethod
     def most_recent_backglasses(
-        games: Iterable["Game"], limit: int = 10, sort: SortField = "createdAt"
+        games: Iterable["Game"], limit: int = 10, sort: SortField = "updatedAt"
     ) -> List[GameBackGlass]:
         """Return the most recently created/updated backglasses across all games."""
         from app.utils.comparators import sort_backglasses_by_created_at, sort_backglasses_by_updated_at
@@ -58,7 +58,7 @@ class Game(BaseModel):
         for g in games:
             bgs.extend(g.b2sFiles)
 
-        sorter = sort_backglasses_by_created_at if sort == "createdAt" else sort_backglasses_by_updated_at
+        sorter = sort_backglasses_by_created_at if sort == "updatedAt" else sort_backglasses_by_updated_at
         return sorter(bgs)[:limit]
 
     @staticmethod
@@ -108,11 +108,6 @@ class Game(BaseModel):
         sorter = sort_backglasses_by_created_at if sort == "createdAt" else sort_backglasses_by_updated_at
         bgs = sorter(bgs)
         return bgs[:limit] if limit else bgs
-
-    @staticmethod
-    def backglasses_by_feature(games: Iterable["Game"], feature: str, limit: int | None = None) -> List[GameBackGlass]:
-        """Back-compat single-feature filter."""
-        return Game.backglasses_by_features(games, [feature], limit=limit)
 
     def to_dict(self) -> dict:
         """Serialize to JSON-friendly dict."""

@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from typing import Any, List
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, current_app, request
 
+from app.services.vpsdb_sync_service import VpsDbSyncService
 from app.models.game import Game
 from app.models.game_back_glass import GameBackGlass
 from app.services.game_repository import GameRepository
 from app.utils.dates import dt_to_iso
-from app.utils.query import get_int, get_str, get_csv_list
+from app.utils.query import get_int, get_str, get_csv_list, parse_bool
 from app.utils.strings import truncate
 
 backglass_widget_bp = Blueprint("backglass_widgets", __name__)
@@ -63,16 +64,30 @@ def _rows_from_backglasses(bgs: List[GameBackGlass]) -> List[dict]:
     return rows
 
 
-def _norm_sort(value: str | None) -> str:
-    """Normalize sort to createdAt/updatedAt (default createdAt)."""
-    v = (value or "").strip().lower()
-    if v in ("updatedat", "updated", "u"):
-        return "updatedAt"
-    return "createdAt"
+def _layout_flags():
+    # default enabled
+    show_header = parse_bool(request.args.get("header"), default=True)
+    show_footer = parse_bool(request.args.get("footer"), default=True)
+    return show_header, show_footer
 
+
+def _norm_sort(value: str | None) -> str:
+    """Normalize sort to createdAt/updatedAt (default updatedAt)."""
+    v = (value or "").strip().lower()
+    if v in ("createdAt", "created", "u"):
+        return "createdAt"
+    return "updatedAt"
+
+
+def _sync_data():
+    """Sync VPSDB data if needed."""
+    settings = current_app.config["SETTINGS"]
+    svc = VpsDbSyncService(settings)
+    svc.sync_if_needed()
 
 @backglass_widget_bp.get("/list")
 def backglass_list_widget():
+    _sync_data()
     """HTML card with a mini-table of most recently created/updated backglasses."""
     limit = get_int("limit", 10, 1, 100)
     theme = get_str("theme", "light")
@@ -89,11 +104,21 @@ def backglass_list_widget():
     )
 
     rows = _rows_from_backglasses(bgs)
-    return render_template("backglasses_list.html", theme=theme, rows=rows, title="Recent Backglasses", sort=sort)
+    show_header, show_footer = _layout_flags()
+    return render_template(
+        "backglasses_list.html",  # whatever your template is
+        show_header=show_header,
+        show_footer=show_footer,
+        theme=theme,
+        rows=rows,
+        title="Recent Backglasses",
+        sort=sort
+    )
 
 
 @backglass_widget_bp.get("/images")
 def backglass_image_row():
+    _sync_data()
     """HTML card with a row of clickable backglass images."""
     limit = get_int("limit", 10, 1, 100)
     theme = get_str("theme", "light")
@@ -110,4 +135,13 @@ def backglass_image_row():
     )
 
     rows = [r for r in _rows_from_backglasses(bgs) if r.get("imgUrl")]
-    return render_template("backglasses_images.html", theme=theme, rows=rows, title="Recent Backglasses", sort=sort)
+    show_header, show_footer = _layout_flags()
+    return render_template(
+        "backglasses_images.html",  # whatever your template is
+        show_header=show_header,
+        show_footer=show_footer,
+        theme=theme,
+        rows=rows,
+        title="Recent Backglasses",
+        sort=sort
+    )

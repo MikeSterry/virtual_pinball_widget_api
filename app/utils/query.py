@@ -26,6 +26,38 @@ def get_bool(name: str, default: bool = False) -> bool:
         return default
     return v.strip().lower() in ("1", "true", "t", "yes", "y", "on")
 
+def parse_bool(value, default=False):
+    """
+    Parse a boolean from common string / numeric representations.
+
+    Truthy values:
+      "1", "true", "t", "yes", "y", "on"
+
+    Falsy values:
+      "0", "false", "f", "no", "n", "off"
+
+    Anything else (including None) returns the default.
+    """
+    if value is None:
+        return default
+
+    if isinstance(value, bool):
+        return value
+
+    if isinstance(value, (int, float)):
+        return value != 0
+
+    if isinstance(value, str):
+        value = value.strip().lower()
+
+        if value in ("1", "true", "t", "yes", "y", "on"):
+            return True
+
+        if value in ("0", "false", "f", "no", "n", "off"):
+            return False
+
+    return default
+
 
 def get_csv_list(name: str) -> list[str]:
     """Read a comma-separated list query param.

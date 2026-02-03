@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, current_app
+
+from app.services.vpsdb_sync_service import VpsDbSyncService
 
 from app.models.game import Game
 from app.services.game_repository import GameRepository
@@ -9,9 +11,15 @@ from app.utils.comparators import sort_games_by_updated_at, sort_tables_by_updat
 
 api_bp = Blueprint("api", __name__)
 
+def _sync_data():
+    """Sync VPSDB data if needed."""
+    settings = current_app.config["SETTINGS"]
+    svc = VpsDbSyncService(settings)
+    svc.sync_if_needed()
 
 @api_bp.get("/games")
 def list_games():
+    _sync_data()
     """Return a JSON list of games with child models."""
     limit = get_int("limit", default=50, min_value=1, max_value=500)
     sort_mode = (get_str("sort", "game_updated") or "game_updated").strip().lower()
@@ -43,6 +51,7 @@ def list_games():
 
 @api_bp.get("/tables")
 def list_tables():
+    _sync_data()
     """Return a flattened list of most-recent tables (optionally filtered by format)."""
     limit = get_int("limit", default=50, min_value=1, max_value=500)
     formats = get_csv_list("format")
@@ -56,6 +65,7 @@ def list_tables():
 
 @api_bp.get("/backglasses")
 def list_backglasses():
+    _sync_data()
     """Return a flattened list of most-recent backglasses (optionally filtered by feature)."""
     limit = get_int("limit", default=50, min_value=1, max_value=500)
     features = get_csv_list("feature")
