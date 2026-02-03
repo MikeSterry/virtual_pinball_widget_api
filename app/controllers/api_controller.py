@@ -5,7 +5,14 @@ from flask import Blueprint, jsonify
 from app.models.game import Game
 from app.services.game_repository import GameRepository
 from app.utils.query import get_int, get_str, get_csv_list
-from app.utils.comparators import sort_games_by_updated_at, sort_tables_by_updated_at, sort_backglasses_by_updated_at
+from app.utils.comparators import (
+    sort_games_by_created_at,
+    sort_games_by_updated_at,
+    sort_tables_by_updated_at,
+    sort_tables_by_created_at,
+    sort_backglasses_by_updated_at,
+    sort_backglasses_by_created_at,
+)
 
 api_bp = Blueprint("api", __name__)
 
@@ -14,17 +21,33 @@ api_bp = Blueprint("api", __name__)
 def list_games():
     """Return a JSON list of games with child models."""
     limit = get_int("limit", default=50, min_value=1, max_value=500)
-    sort_mode = (get_str("sort", "game_updated") or "game_updated").strip().lower()
+    sort_mode = (get_str("sort", "game_created") or "game_created").strip().lower()
 
     repo = GameRepository.from_flask_app()
     games = repo.list_games()
 
-    if sort_mode == "table_updated":
+    if sort_mode == "table_created":
+        tables = sort_tables_by_created_at([t for g in games for t in g.tableFiles])[:limit]
+        game_ids: list[str] = []
+        for t in tables:
+            if t.gameId and t.gameId not in game_ids:
+                game_ids.append(t.gameId)
+        games = [g for g in games if g.id in set(game_ids)]
+        games = sorted(games, key=lambda g: game_ids.index(g.id))
+    elif sort_mode == "table_updated":
         tables = sort_tables_by_updated_at([t for g in games for t in g.tableFiles])[:limit]
         game_ids: list[str] = []
         for t in tables:
             if t.gameId and t.gameId not in game_ids:
                 game_ids.append(t.gameId)
+        games = [g for g in games if g.id in set(game_ids)]
+        games = sorted(games, key=lambda g: game_ids.index(g.id))
+    elif sort_mode == "backglass_created":
+        bgs = sort_backglasses_by_created_at([b for g in games for b in g.b2sFiles])[:limit]
+        game_ids: list[str] = []
+        for b in bgs:
+            if b.gameId and b.gameId not in game_ids:
+                game_ids.append(b.gameId)
         games = [g for g in games if g.id in set(game_ids)]
         games = sorted(games, key=lambda g: game_ids.index(g.id))
     elif sort_mode == "backglass_updated":
@@ -35,8 +58,10 @@ def list_games():
                 game_ids.append(b.gameId)
         games = [g for g in games if g.id in set(game_ids)]
         games = sorted(games, key=lambda g: game_ids.index(g.id))
-    else:
+    elif sort_mode == "game_updated":
         games = sort_games_by_updated_at(games)[:limit]
+    else:
+        games = sort_games_by_created_at(games)[:limit]
 
     return jsonify({"count": len(games), "games": [g.to_dict() for g in games]})
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import List
 
 from flask import current_app
@@ -26,4 +27,8 @@ class GameRepository:
     def list_games(self) -> List[Game]:
         """Load and map all games."""
         raw = self.loader.load_raw()
-        return self.mapper.map_games(raw)
+        games = self.mapper.map_games(raw)
+
+        # Sort newest → oldest by createdAt. Missing createdAt values sink to the bottom.
+        min_dt_utc = datetime.min.replace(tzinfo=timezone.utc)
+        return sorted(games, key=lambda g: g.createdAt or min_dt_utc, reverse=True)

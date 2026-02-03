@@ -26,13 +26,23 @@ class Game(BaseModel):
 
     @staticmethod
     def most_recent_games(games: Iterable["Game"], limit: int = 10) -> List["Game"]:
-        """Return the most recently updated games."""
-        from app.utils.comparators import sort_games_by_updated_at
+        """Return the most recently created games."""
+        from app.utils.comparators import sort_games_by_created_at
 
-        return sort_games_by_updated_at(list(games))[:limit]
+        return sort_games_by_created_at(list(games))[:limit]
 
     @staticmethod
     def most_recent_tables(games: Iterable["Game"], limit: int = 10) -> List[GameTable]:
+        """Return the most recently updated tables across all games."""
+        from app.utils.comparators import sort_tables_by_created_at
+
+        tables: List[GameTable] = []
+        for g in games:
+            tables.extend(g.tableFiles)
+        return sort_tables_by_created_at(tables)[:limit]
+
+    @staticmethod
+    def most_recent_updated_tables(games: Iterable["Game"], limit: int = 10) -> List[GameTable]:
         """Return the most recently updated tables across all games."""
         from app.utils.comparators import sort_tables_by_updated_at
 
@@ -43,6 +53,16 @@ class Game(BaseModel):
 
     @staticmethod
     def most_recent_backglasses(games: Iterable["Game"], limit: int = 10) -> List[GameBackGlass]:
+        """Return the most recently updated backglasses across all games."""
+        from app.utils.comparators import sort_backglasses_by_created_at
+
+        bgs: List[GameBackGlass] = []
+        for g in games:
+            bgs.extend(g.b2sFiles)
+        return sort_backglasses_by_created_at(bgs)[:limit]
+
+    @staticmethod
+    def most_recent_updated_backglasses(games: Iterable["Game"], limit: int = 10) -> List[GameBackGlass]:
         """Return the most recently updated backglasses across all games."""
         from app.utils.comparators import sort_backglasses_by_updated_at
 
@@ -85,7 +105,7 @@ class Game(BaseModel):
         limit: int | None = None,
     ) -> List[GameBackGlass]:
         """Filter backglasses by one-or-more features and return most recently updated."""
-        from app.utils.comparators import sort_backglasses_by_updated_at
+        from app.utils.comparators import sort_backglasses_by_created_at
 
         wanted = {(f or "").strip().lower() for f in (features or []) if (f or "").strip()}
         if not wanted:
@@ -97,7 +117,7 @@ class Game(BaseModel):
                 if any((x or "").strip().lower() in wanted for x in (b.features or [])):
                     bgs.append(b)
 
-        bgs = sort_backglasses_by_updated_at(bgs)
+        bgs = sort_backglasses_by_created_at(bgs)
         return bgs[:limit] if limit else bgs
 
     @staticmethod
