@@ -1,40 +1,56 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import List
-
-from app.models.game import Game
-from app.models.game_table import GameTable
-from app.models.game_back_glass import GameBackGlass
+from typing import Any, List, Sequence
 
 
-def _dt_or_min(dt: datetime | None) -> datetime:
-    """Return dt or a minimal datetime for safe sorting."""
-    return dt if dt is not None else datetime.min.replace(tzinfo=timezone.utc)
+def _dt_or_min_utc(dt: datetime | None) -> datetime:
+    """
+    Normalize datetimes for safe comparison:
+    - If None: return the minimum UTC-aware datetime
+    - If naive: treat it as UTC (attach tzinfo=UTC)
+    - If aware: keep as-is
+    """
+    if not isinstance(dt, datetime):
+        return datetime.min.replace(tzinfo=timezone.utc)
+
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+
+    return dt
 
 
-def sort_games_by_updated_at(games: List[Game]) -> List[Game]:
-    """Sort games descending by updatedAt."""
-    return sorted(games, key=lambda g: _dt_or_min(g.updatedAt), reverse=True)
+# -------- Games --------
 
-def sort_games_by_created_at(games: List[Game]) -> List[Game]:
-    """Sort games descending by createdAt."""
-    return sorted(games, key=lambda g: _dt_or_min(g.createdAt), reverse=True)
+def sort_games_by_created_at(games: Sequence[Any]) -> List[Any]:
+    """Sort games by createdAt descending."""
+    return sorted(games, key=lambda g: _dt_or_min_utc(getattr(g, "createdAt", None)), reverse=True)
 
 
-def sort_tables_by_updated_at(tables: List[GameTable]) -> List[GameTable]:
-    """Sort tables descending by updatedAt."""
-    return sorted(tables, key=lambda t: _dt_or_min(t.updatedAt), reverse=True)
-
-def sort_tables_by_created_at(tables: List[GameTable]) -> List[GameTable]:
-    """Sort tables descending by createdAt."""
-    return sorted(tables, key=lambda t: _dt_or_min(t.createdAt), reverse=True)
+def sort_games_by_updated_at(games: Sequence[Any]) -> List[Any]:
+    """Sort games by updatedAt descending."""
+    return sorted(games, key=lambda g: _dt_or_min_utc(getattr(g, "updatedAt", None)), reverse=True)
 
 
-def sort_backglasses_by_updated_at(backglasses: List[GameBackGlass]) -> List[GameBackGlass]:
-    """Sort backglasses descending by updatedAt."""
-    return sorted(backglasses, key=lambda b: _dt_or_min(b.updatedAt), reverse=True)
+# -------- Tables --------
 
-def sort_backglasses_by_created_at(backglasses: List[GameBackGlass]) -> List[GameBackGlass]:
-    """Sort backglasses descending by createdAt."""
-    return sorted(backglasses, key=lambda b: _dt_or_min(b.createdAt), reverse=True)
+def sort_tables_by_created_at(tables: Sequence[Any]) -> List[Any]:
+    """Sort tables by createdAt descending."""
+    return sorted(tables, key=lambda t: _dt_or_min_utc(getattr(t, "createdAt", None)), reverse=True)
+
+
+def sort_tables_by_updated_at(tables: Sequence[Any]) -> List[Any]:
+    """Sort tables by updatedAt descending."""
+    return sorted(tables, key=lambda t: _dt_or_min_utc(getattr(t, "updatedAt", None)), reverse=True)
+
+
+# -------- Backglasses --------
+
+def sort_backglasses_by_created_at(bgs: Sequence[Any]) -> List[Any]:
+    """Sort backglasses by createdAt descending."""
+    return sorted(bgs, key=lambda b: _dt_or_min_utc(getattr(b, "createdAt", None)), reverse=True)
+
+
+def sort_backglasses_by_updated_at(bgs: Sequence[Any]) -> List[Any]:
+    """Sort backglasses by updatedAt descending."""
+    return sorted(bgs, key=lambda b: _dt_or_min_utc(getattr(b, "updatedAt", None)), reverse=True)

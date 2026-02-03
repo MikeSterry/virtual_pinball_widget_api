@@ -9,19 +9,7 @@ from app.utils.dates import epoch_to_dt
 
 
 class VpsDbMapper:
-    """Maps VPSDB JSON objects into our typed model classes.
-
-    The upstream schema (as of the bundled vpsdb.json) looks like:
-
-    Game:
-      id, name, year, lastCreatedAt, updatedAt, tableFiles[], b2sFiles[]
-
-    Table file:
-      id, version, tableFormat, authors[], imgUrl, urls[{url, broken?}], createdAt, updatedAt, game{id,name}
-
-    Backglass file:
-      id, version, authors[], features[], imgUrl, urls[{url, broken?}], createdAt, updatedAt, game{id,name}
-    """
+    """Maps VPSDB JSON objects into our typed model classes."""
 
     def map_games(self, raw: Any) -> List[Game]:
         """Map raw JSON root into a list of Game models."""
@@ -33,7 +21,6 @@ class VpsDbMapper:
         if isinstance(raw, list):
             return [x for x in raw if isinstance(x, dict)]
         if isinstance(raw, dict):
-            # Not expected for vpsdb.json, but supported defensively.
             for key in ("data", "items", "games"):
                 v = raw.get(key)
                 if isinstance(v, list):
@@ -46,15 +33,16 @@ class VpsDbMapper:
         if not gid:
             return None
 
-        updated = epoch_to_dt(it.get("updatedAt"))
-        created = epoch_to_dt(it.get("lastCreatedAt")) or updated
+        updated_dt = epoch_to_dt(it.get("updatedAt"))
+        created_dt = epoch_to_dt(it.get("createdAt")) or updated_dt
 
         game = Game(
             id=gid,
             name=it.get("name"),
+            manufacturer=it.get("manufacturer"),
             year=self._safe_int(it.get("year")),
-            createdAt=created,
-            updatedAt=updated,
+            createdAt=created_dt,
+            updatedAt=updated_dt,
         )
 
         for t in self._as_dict_list(it.get("tableFiles")):
@@ -75,9 +63,12 @@ class VpsDbMapper:
         if not tid:
             return None
 
+        # allow child entries to override parent via embedded "game" dict
         game_meta = it.get("game") if isinstance(it.get("game"), dict) else {}
         game_id = str(game_meta.get("id") or parent.id)
         game_name = str(game_meta.get("name") or parent.name or "")
+        game_mfr = game_meta.get("manufacturer") or parent.manufacturer
+        game_year = self._safe_int(game_meta.get("year")) if "year" in game_meta else parent.year
 
         t = GameTable(
             id=tid,
@@ -89,6 +80,8 @@ class VpsDbMapper:
             updatedAt=epoch_to_dt(it.get("updatedAt")),
             gameId=game_id,
             gameName=game_name,
+            gameManufacturer=game_mfr,
+            gameYear=game_year,
         )
 
         for u in self._as_dict_list(it.get("urls")):
@@ -107,6 +100,8 @@ class VpsDbMapper:
         game_meta = it.get("game") if isinstance(it.get("game"), dict) else {}
         game_id = str(game_meta.get("id") or parent.id)
         game_name = str(game_meta.get("name") or parent.name or "")
+        game_mfr = game_meta.get("manufacturer") or parent.manufacturer
+        game_year = self._safe_int(game_meta.get("year")) if "year" in game_meta else parent.year
 
         b = GameBackGlass(
             id=bid,
@@ -118,6 +113,8 @@ class VpsDbMapper:
             updatedAt=epoch_to_dt(it.get("updatedAt")),
             gameId=game_id,
             gameName=game_name,
+            gameManufacturer=game_mfr,
+            gameYear=game_year,
         )
 
         for u in self._as_dict_list(it.get("urls")):

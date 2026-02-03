@@ -4,20 +4,24 @@
     <thead>
       <tr>
         <th>Name</th>
+        <th>Manufacturer</th>
+        <th>Year</th>
         <th>Version</th>
         <th>Features</th>
         <th>Authors</th>
-        <th>Updated</th>
+        <th>{{ "Created" if sort == "createdAt" else "Updated" }}</th>
       </tr>
     </thead>
     <tbody>
       {% for r in rows %}
       <tr class="click-row" data-href="{{ r.url }}">
         <td class="name">{{ r.name }}</td>
-        <td>{{ r.version }}</td>
+        <td class="manufacturer">{{ r.manufacturer }}</td>
+        <td class="year">{{ r.year }}</td>
+        <td class="version">{{ r.version }}</td>
         <td class="muted">{{ r.features }}</td>
         <td class="muted">{{ r.authors }}</td>
-        <td class="muted">{{ r.updatedAt }}</td>
+        <td class="muted">{{ r.createdAt if sort == "createdAt" else r.updatedAt }}</td>
       </tr>
       {% endfor %}
     </tbody>
