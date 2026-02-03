@@ -17,12 +17,24 @@ def sort_games_by_updated_at(games: List[Game]) -> List[Game]:
     """Sort games descending by updatedAt."""
     return sorted(games, key=lambda g: _dt_or_min(g.updatedAt), reverse=True)
 
+def sort_games_by_created_at(games: List[Game]) -> List[Game]:
+    """Sort games descending by createdAt."""
+    return sorted(games, key=lambda g: _dt_or_min(g.createdAt), reverse=True)
+
 
 def sort_tables_by_updated_at(tables: List[GameTable]) -> List[GameTable]:
     """Sort tables descending by updatedAt."""
     return sorted(tables, key=lambda t: _dt_or_min(t.updatedAt), reverse=True)
 
+def sort_tables_by_created_at(tables: List[GameTable]) -> List[GameTable]:
+    """Sort tables descending by createdAt."""
+    return sorted(tables, key=lambda t: _dt_or_min(t.createdAt), reverse=True)
+
 
 def sort_backglasses_by_updated_at(backglasses: List[GameBackGlass]) -> List[GameBackGlass]:
     """Sort backglasses descending by updatedAt."""
     return sorted(backglasses, key=lambda b: _dt_or_min(b.updatedAt), reverse=True)
+
+def sort_backglasses_by_created_at(backglasses: List[GameBackGlass]) -> List[GameBackGlass]:
+    """Sort backglasses descending by createdAt."""
+    return sorted(backglasses, key=lambda b: _dt_or_min(b.createdAt), reverse=True)
