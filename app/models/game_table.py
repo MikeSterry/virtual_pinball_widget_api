@@ -22,9 +22,11 @@ class GameTable(BaseModel):
     createdAt: datetime | None = None
     updatedAt: datetime | None = None
 
-    # Parent metadata (for widgets / flattened APIs)
+    # --- Parent game metadata (used by widgets + flattened APIs) ---
     gameId: str | None = None
     gameName: str | None = None
+    gameManufacturer: str | None = None
+    gameYear: int | None = None
 
     def add_url(self, url: str, broken: bool = False) -> None:
         """Add a URL with incrementing priority."""
@@ -50,5 +52,10 @@ class GameTable(BaseModel):
             "urls": [u.to_dict() for u in self.urls],
             "createdAt": dt_to_iso(self.createdAt),
             "updatedAt": dt_to_iso(self.updatedAt),
-            "game": {"id": self.gameId, "name": self.gameName},
+            "game": {
+                "id": self.gameId,
+                "name": self.gameName,
+                "manufacturer": self.gameManufacturer,
+                "year": self.gameYear,
+            },
         }

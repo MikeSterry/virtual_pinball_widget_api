@@ -1,10 +1,11 @@
----
+version: "3.9"
+
 services:
-  virtual-pinball-widget-api:
+  pinball-widget-api:
     build: .
-    container_name: virtual-pinball-widget-api
+    container_name: pinball-widget-api
     ports:
-      - "8007:8000"
+      - "8000:8000"
     environment:
       - VPSDB_REMOTE_URL=https://virtualpinballspreadsheet.github.io/vps-db/db/vpsdb.json
       - VPSDB_LASTUPDATED_URL=https://virtualpinballspreadsheet.github.io/vps-db/lastUpdated.json
@@ -16,7 +17,7 @@ services:
     volumes:
       - ./data:/data
     healthcheck:
-      test: ["CMD-SHELL", "python -c import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read(); print('ok')"]
+      test: ["CMD-SHELL", "python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read(); print('ok')""]
       interval: 30s
       timeout: 5s
       retries: 3
