@@ -33,20 +33,24 @@ Example:
 - `GET /widgets/tables/list`
   - Returns an HTML card widget showing the most recently updated tables
   - Query params:
+    - `sort` (string, default `created`): `updated | created`
     - `limit` (int, default 10): number of tables to return
     - `format` (string, optional): filter on a table format value (exact, case-insensitive)
     - `theme` (string, default `light`): `light | dark | transparent`
+    - `header` (string, default `true`): `true | false`
+    - `footer` (string, default `true`): `true | false`
 
 Examples:
 - `/widgets/tables/list`
 - `/widgets/tables/list?limit=15&theme=dark`
 - `/widgets/tables/list?format=vpx&limit=10&theme=transparent`
+- `/widgets/tables/list?format=fp&limit=5&theme=light&sort=updated`
 
 ### Image row widget
 - `GET /widgets/tables/images`
   - Same filtering/sorting as `/widgets/tables/list`, but displayed as a horizontal row of images
   - Query params:
-    - `limit`, `format`, `theme`
+    - `sort`, `limit`, `format`, `theme`, `header`, `footer`
 
 Examples:
 - `/widgets/tables/images?limit=12`
@@ -60,19 +64,23 @@ Examples:
 - `GET /widgets/backglasses/list`
   - Returns an HTML card widget showing the most recently updated backglasses
   - Query params:
+    - `sort` (string, default `updated`): `updated | created`
     - `limit` (int, default 10): number of items to return
     - `feature` (string, optional): filter on a single feature name (exact, case-insensitive)
     - `theme` (string, default `light`): `light | dark | transparent`
+    - `header` (string, default `true`): `true | false`
+    - `footer` (string, default `true`): `true | false`
 
 Examples:
 - `/widgets/backglasses/list`
 - `/widgets/backglasses/list?limit=10&feature=2-screen&theme=dark`
+- `/widgets/backglasses/list?limit=10&feature=2-screen&theme=dark&sort=created`
 
 ### Image row widget
 - `GET /widgets/backglasses/images`
   - Same filtering/sorting as `/widgets/backglasses/list`, but displayed as a horizontal row of images
   - Query params:
-    - `limit`, `feature`, `theme`
+    - `sort`, `limit`, `feature`, `theme`, `header`, `footer`
 
 ---
 
@@ -162,4 +170,7 @@ Manual sync:
     - `localTimestamp`
     - `remoteTimestamp`
 
-- `GET /sync/status?remote=false` — returns only the local timestamp without calling the remote service.
+### Sync behavior
+- Automatic sync is performed on app startup when `VPSDB_SYNC_ON_START` is `true`.
+- Sync errors are logged but do not prevent app startup.
+- Sync opertations happen when the table or backglass widgets are requested.
