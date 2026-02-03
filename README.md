@@ -161,3 +161,5 @@ Manual sync:
     - `updated` (bool)
     - `localTimestamp`
     - `remoteTimestamp`
+
+- `GET /sync/status?remote=false` — returns only the local timestamp without calling the remote service.
