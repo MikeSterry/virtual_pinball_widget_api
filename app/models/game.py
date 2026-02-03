@@ -109,6 +109,11 @@ class Game(BaseModel):
         bgs = sorter(bgs)
         return bgs[:limit] if limit else bgs
 
+    @staticmethod
+    def backglasses_by_feature(games: Iterable["Game"], feature: str, limit: int | None = None) -> List[GameBackGlass]:
+        """Back-compat single-feature filter."""
+        return Game.backglasses_by_features(games, [feature], limit=limit)
+
     def to_dict(self) -> dict:
         """Serialize to JSON-friendly dict."""
         return {
