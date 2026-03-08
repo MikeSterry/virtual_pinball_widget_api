@@ -6,6 +6,7 @@ from app.controllers.table_widget_controller import table_widget_bp
 from app.controllers.backglass_widget_controller import backglass_widget_bp
 from app.controllers.health_controller import health_bp
 from app.controllers.vpsdb_sync_controller import vpsdb_sync_bp
+from app.utils.logging_utils import configure_logging
 
 
 def create_app() -> Flask:
@@ -15,6 +16,9 @@ def create_app() -> Flask:
     # Load settings into app config
     settings = Settings.from_env()
     app.config["SETTINGS"] = settings
+
+        # Configure logging
+    configure_logging(settings.LOG_LEVEL)
 
     # Register blueprints
     app.register_blueprint(health_bp)

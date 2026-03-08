@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from typing import Any, List
-
+import logging
 from flask import Blueprint, render_template, current_app, request
-
 from app.services.vpsdb_sync_service import VpsDbSyncService
 from app.models.game import Game
 from app.models.game_back_glass import GameBackGlass
@@ -13,6 +12,7 @@ from app.utils.query import get_int, get_str, get_csv_list, parse_bool
 from app.utils.strings import truncate
 
 backglass_widget_bp = Blueprint("backglass_widgets", __name__)
+Logger = logging.getLogger(__name__)
 
 
 def _get_attr(obj: Any, name: str, default: Any = "") -> Any:
@@ -94,6 +94,8 @@ def backglass_list_widget():
     features = get_csv_list("feature")
     sort = _norm_sort(get_str("sort", None))
 
+    logging.info(f"Received request for /widgets/backglasses/list with limit={limit}, theme={theme}, features={features}, sort={sort}")
+
     repo = GameRepository.from_flask_app()
     games = repo.list_games()
 
@@ -124,6 +126,8 @@ def backglass_image_row():
     theme = get_str("theme", "light")
     features = get_csv_list("feature")
     sort = _norm_sort(get_str("sort", None))
+
+    logging.info(f"Received request for /widgets/backglasses/images with limit={limit}, theme={theme}, features={features}, sort={sort}")
 
     repo = GameRepository.from_flask_app()
     games = repo.list_games()

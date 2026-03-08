@@ -4,9 +4,11 @@ import json
 import os
 import time
 from dataclasses import dataclass
-
 from app.clients.vpsdb_client import VpsDbClient
 from app.configs.settings import Settings
+import logging
+
+Logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -61,17 +63,25 @@ class VpsDbSyncService:
         - If local JSON doesn't exist, we always download.
         - If remote lastUpdated > local lastUpdated, download and update both files.
         """
+        logging.info("Validating if we need to sync with remote VPSDB source")
         self.ensure_storage_dir()
         local_ts = self.read_local_timestamp()
         remote_ts = self._client.fetch_remote_timestamp()
 
+        Logger.info(f"Checking remote sync. Local timestamp: {local_ts}, Remote timestamp: {remote_ts}")
         needs_download = (not self.local_json_exists()) or (remote_ts > local_ts)
+        logging.info(f"Do we need to update the local file: {needs_download}")
         if not needs_download:
             return SyncResult(updated=False, local_timestamp=local_ts, remote_timestamp=remote_ts)
 
+        logging.info("Downloading new vpsdb JSON file")
         json_text = self._client.fetch_db_json_text()
         with open(self._settings.LOCAL_JSON_PATH, "w", encoding="utf-8") as f:
             f.write(json_text)
+        logging.info(f"Local vpsdb JSON file updated at {self._settings.LOCAL_JSON_PATH}")
 
+        logging.info("Writing new local timestamp")
         self.write_local_timestamp(remote_ts)
+
+        logging.info("Syncing complete")
         return SyncResult(updated=True, local_timestamp=remote_ts, remote_timestamp=remote_ts)

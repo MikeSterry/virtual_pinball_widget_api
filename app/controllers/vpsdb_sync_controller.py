@@ -1,15 +1,16 @@
 from __future__ import annotations
-
+import logging
 from flask import Blueprint, current_app, jsonify
-
 from app.services.vpsdb_sync_service import VpsDbSyncService
 
 vpsdb_sync_bp = Blueprint("vpsdb_sync", __name__)
+Logger = logging.getLogger(__name__)
 
 
 @vpsdb_sync_bp.get("/sync/status")
 def sync_status():
     """Return local vs remote sync timestamps without downloading the DB."""
+    logging.info(f"Received request for /sync/status")
     settings = current_app.config["SETTINGS"]
     svc = VpsDbSyncService(settings)
 
@@ -23,6 +24,7 @@ def sync_status():
 @vpsdb_sync_bp.post("/sync")
 def sync_now():
     """Manual sync: download the DB only if the remote timestamp is newer."""
+    logging.info(f"Received request for /sync, initiating sync check")
     settings = current_app.config["SETTINGS"]
     svc = VpsDbSyncService(settings)
     result = svc.sync_if_needed()
