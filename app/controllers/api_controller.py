@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 from flask import Blueprint, jsonify, current_app
-
 from app.services.vpsdb_sync_service import VpsDbSyncService
-
 from app.models.game import Game
+import logging
 from app.services.game_repository import GameRepository
 from app.utils.query import get_int, get_str, get_csv_list
 from app.utils.comparators import sort_games_by_updated_at, sort_tables_by_updated_at, sort_backglasses_by_updated_at
 
 api_bp = Blueprint("api", __name__)
+Logger = logging.getLogger(__name__)
 
 def _sync_data():
     """Sync VPSDB data if needed."""
@@ -23,6 +23,8 @@ def list_games():
     """Return a JSON list of games with child models."""
     limit = get_int("limit", default=50, min_value=1, max_value=500)
     sort_mode = (get_str("sort", "game_updated") or "game_updated").strip().lower()
+
+    logging.info(f"Received request for /api/games with limit={limit} and sort={sort_mode}")
 
     repo = GameRepository.from_flask_app()
     games = repo.list_games()
@@ -56,6 +58,8 @@ def list_tables():
     limit = get_int("limit", default=50, min_value=1, max_value=500)
     formats = get_csv_list("format")
 
+    logging.info(f"Received request for /api/tables with limit={limit} and format={formats}")
+
     repo = GameRepository.from_flask_app()
     games = repo.list_games()
 
@@ -69,6 +73,8 @@ def list_backglasses():
     """Return a flattened list of most-recent backglasses (optionally filtered by feature)."""
     limit = get_int("limit", default=50, min_value=1, max_value=500)
     features = get_csv_list("feature")
+
+    logging.info(f"Received request for /api/tables with limit={limit} and features={features}")
 
     repo = GameRepository.from_flask_app()
     games = repo.list_games()

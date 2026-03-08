@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from typing import Any, List
-
+import logging
 from flask import Blueprint, render_template, current_app, request
-
 from app.services.vpsdb_sync_service import VpsDbSyncService
 from app.models.game import Game
 from app.models.game_table import GameTable
@@ -13,6 +12,7 @@ from app.utils.query import get_int, get_str, get_csv_list, parse_bool
 from app.utils.strings import truncate
 
 table_widget_bp = Blueprint("table_widgets", __name__)
+Logger = logging.getLogger(__name__)
 
 
 def _get_attr(obj: Any, name: str, default: Any = "") -> Any:
@@ -100,6 +100,8 @@ def tables_list_widget():
     formats = get_csv_list("format")
     sort = _norm_sort(get_str("sort", None))
 
+    logging.info(f"Received request for /tables/list with limit={limit}, theme={theme}, format={formats}, sort={sort}")
+
     repo = GameRepository.from_flask_app()
     games = repo.list_games()
 
@@ -130,6 +132,8 @@ def tables_image_row():
     theme = get_str("theme", "light")
     formats = get_csv_list("format")
     sort = _norm_sort(get_str("sort", None))
+
+    logging.info(f"Received request for /tables/images with limit={limit}, theme={theme}, format={formats}, sort={sort}")
 
     repo = GameRepository.from_flask_app()
     games = repo.list_games()

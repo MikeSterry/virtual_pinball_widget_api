@@ -18,6 +18,8 @@ class Settings:
     CACHE_TTL_SECONDS: int
     SYNC_ON_START: bool
 
+    LOG_LEVEL: str = "INFO"
+
     @staticmethod
     def _get_int(name: str, default: int) -> int:
         """Read an int env var with a safe default."""
@@ -40,6 +42,7 @@ class Settings:
         storage_dir = os.getenv("VPSDB_STORAGE_DIR", "./data").rstrip("/")
         local_json = os.getenv("VPSDB_LOCAL_JSON_PATH", f"{storage_dir}/vpsdb.json")
         local_ts = os.getenv("VPSDB_LOCAL_TIMESTAMP_PATH", f"{storage_dir}/vpsdb.lastUpdated.json")
+        # log_level = os.getenv("LOG_LEVEL", "WARNING").upper(),
 
         return cls(
             VPSDB_REMOTE_URL=os.getenv(
@@ -53,6 +56,7 @@ class Settings:
             STORAGE_DIR=storage_dir,
             LOCAL_JSON_PATH=local_json,
             LOCAL_TIMESTAMP_PATH=local_ts,
+            # LOG_LEVEL=log_level,
             CACHE_TTL_SECONDS=cls._get_int("CACHE_TTL_SECONDS", 900),
             SYNC_ON_START=cls._get_bool("VPSDB_SYNC_ON_START", True),
         )
