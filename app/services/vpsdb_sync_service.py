@@ -31,7 +31,7 @@ class VpsDbSyncService:
 
     def ensure_storage_dir(self) -> None:
         """Ensure the storage directory exists."""
-        os.makedirs(self._settings.STORAGE_DIR, exist_ok=True)
+        os.makedirs(self._settings.STORAGE_DIR, mode=0o777, exist_ok=True)
 
     def read_local_timestamp(self) -> int:
         """Read the local associated epoch timestamp (0 when missing/invalid)."""
@@ -57,6 +57,18 @@ class VpsDbSyncService:
         """Return True when the local JSON file exists."""
         return os.path.exists(self._settings.LOCAL_JSON_PATH)
 
+    def check_and_fix_local_file_perms(self) -> None:
+        """Ensure the local JSON data has read/write permissions for the owner."""
+        if os.access(self._settings.STORAGE_DIR, os.W_OK | os.R_OK):
+            os.chmod(self._settings.STORAGE_DIR, 0o777)
+            logging.info(f"Fixed local data directory permissions and set to 777 for {self._settings.STORAGE_DIR}")
+        if os.access(self._settings.LOCAL_TIMESTAMP_PATH, os.W_OK | os.R_OK):
+            os.chmod(self._settings.LOCAL_TIMESTAMP_PATH, 0o777)
+            logging.info(f"Fixed local timestamp JSON file permissions and set to 777 for {self._settings.LOCAL_TIMESTAMP_PATH}")
+        if os.access(self._settings.LOCAL_JSON_PATH, os.W_OK | os.R_OK):
+            os.chmod(self._settings.LOCAL_JSON_PATH, 0o777)
+            logging.info(f"Fixed local vpsdb JSON file permissions and set to 777 for {self._settings.LOCAL_JSON_PATH}")
+
     def sync_if_needed(self) -> SyncResult:
         """Sync local file if the remote timestamp is newer.
 
@@ -65,6 +77,7 @@ class VpsDbSyncService:
         """
         logging.info("Validating if we need to sync with remote VPSDB source")
         self.ensure_storage_dir()
+        self.check_and_fix_local_file_perms()
         local_ts = self.read_local_timestamp()
         remote_ts = self._client.fetch_remote_timestamp()
 
